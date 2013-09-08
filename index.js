@@ -4,7 +4,7 @@ var map, preSearch, heatmap, duration, curLat, curLong, curId, curArtist, curSon
 	mapOptions = {
 		zoom: 4,
 		center: new google.maps.LatLng(37.09024, -95.712891),
-		mapTypeId: google.maps.MapTypeId.SATELLITE
+		mapTypeId: google.maps.MapTypeId.HYBRID
 	};
 
 $(document).ready(function() {
@@ -22,7 +22,27 @@ $(document).ready(function() {
 		songs = $.get('/allSongs', setPoints);
 		service = new google.maps.places.PlacesService(map);
 
-		$('#search').keydown(onSearch);
+		$('#locationField').keydown(onSearch);
+
+		$(document).on('click', '.locationResult', function(event) {
+			var geocoder = new google.maps.Geocoder(),
+				addr = $(this).html();
+
+			$('#locationField').val('');
+			$('#locationSearchResults').html('');
+			geocoder.geocode({'address': addr}, function(addressResults, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					var loc = addressResults[0].geometry.location;
+					curLat = loc.ob;
+					curLong = loc.pb;
+					map.setZoom(15);
+					map.panTo(new google.maps.LatLng(curLat, curLong));
+					queueNextSong();
+				} else {
+					console.log("Geocode was not successful for the following reason: " + status);
+				}
+			});
+		});
 
 		$('#heatmap').click(function(e) {
 			e.preventDefault();
@@ -63,6 +83,9 @@ $(document).ready(function() {
 		$('#api').bind('positionChanged.rdio', function(e, position) {
         	$('#durationBar').css('width', (100*position/duration)+'%');
 			$('#right #currentTime').text(prettyTime(position));
+			if (duration - position < 1) {
+				queueNextSong();
+			}
       	});	
 		
 		$(document).on('click', '.result', function(e) {
@@ -195,36 +218,18 @@ function queueNextSong() {
 }
 		
 function onSearch() {
-	var resultsList = $('#results');
+	var resultsList = $('#locationSearchResults');
 	resultsList.html('');
 
 	if ($(this).val().length >= 2 && preSearch != $(this).val()) {								
 		$.get('/map?input=' + $(this).val() + '&location=37.76999,-122.4469',
 			function(data) {
 				data = JSON.parse(data);
-				var results = data.predictions,
-					autocomp = [];
+				console.log(data);
+				var results = data.predictions;
 				for (var i = 0;i < results.length;i++) {
-					autocomp.push(results[i].description);
-				}
-					
-				$('#search').autocomplete({
-					source: autocomp,
-					select: function(event, ui) {
-						var geocoder = new google.maps.Geocoder();
-
-						geocoder.geocode({'address': ui.item.value}, function(addressResults, status) {
-							if (status == google.maps.GeocoderStatus.OK) {
-								var loc = addressResults[0].geometry.location;
-								map.setZoom(10);
-								map.panTo(new google.maps.LatLng(loc.ob, loc.pb));
-							} else {
-								console.log("Geocode was not successful for the following reason: " + status);
-							}
-						});
-					}
-				});
-				
+					resultsList.append('<li class="locationResult">' + results[i].description + '</li>');
+				}	
 		});	
 		preSearch = $(this).val();
 	}
