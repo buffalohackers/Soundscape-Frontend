@@ -118,7 +118,26 @@ a {
 	color: #fff;
 }
 
-#search .searchResults {
+#locationSearchResults {
+	position: absolute;
+	top: 134px;
+	right: 190px;
+	width: 350px;
+	z-index: 10;
+	background: white;
+}
+
+#locationSearchResults li {
+	border-top: 1px solid #979797;
+	padding: 5px;
+	cursor: pointer;
+}
+
+#locationSearchResults li:hover {
+	background: #F8F8F8;
+}
+
+#search .searchResults, #locationSearchResults {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
@@ -137,7 +156,7 @@ a {
 	padding-top: 15px;
 }
 
-#search .searchResults li > * {
+#search .searchResults li > *, #locationSearchResults {
 	float: left;
 }
 
