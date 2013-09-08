@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+		<link href="/gpsong/index.css" rel="stylesheet">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="jquery.rdio.js"></script>
+		<script src="jquery.cookie.js"></script>
+    	<script src="https://maps.googleapis.com/maps/api/js?libraries=places,visualization&v=3.exp&sensor=false"></script>
+		<script type="text/javascript" src="/gpsong/index.js"></script>
+	</head>
+	<body>
+		<div id="api"></div>
+		<div id="search">
+			<p id="closeButton">X</p>
+			<h1 class="heading">Search Songs</h1>
+			<h3 class="subTitle">Search for a song to play, and pin at your current location</h3>
+			<input type="text" placeholder="Press enter to search" id="searchField" autofocus>
+			<center>
+				<i class="icon-spinner icon-spin icon-large"></i>
+				<ul class="searchResults">
+				</ul>
+			</center>
+
+		</div>
+		
+		<input type="text" placeholder="Search a location to listen to music" id="locationField">
+		<button type="submit" id="locationSubmit"><i class="icon-search"></i> Search</button>
+	
+		<div id="map-canvas"></div>
+
+		<div id="durationBar"></div>
+		<div id="bottom-playbar">
+			<div id ="left">
+				<img id="albumArt" src="">
+				<div class="titles">
+					<h2 class="songTitle">Undefined</h2>
+					<h3 class="artist">Undefined</h3>
+				</div>
+			</div>
+			<div id="right">
+				<div id="duration"><span id="currentTime">0:00</span> / <span id="totalTime">0:00</span></div>
+				<a href="#" id="searchOpen">Search Songs</a>
+			</div>
+			<p id="controller">
+				<span id="favorite"><i class="icon-star-empty"></i></span> 
+				<span id="play"><i class="icon-play"></i><i class="icon-pause"></i></span> 
+				<span id="skip"><i class="icon-fast-forward"></i></span>
+			</p>
+		</div>
+	</body>
+</html>
