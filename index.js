@@ -1,4 +1,4 @@
-var map, preSearch, heatmap, duration, curLat, curLong, curId,
+var map, preSearch, heatmap, duration, curLat, curLong, curId, curArtist, curSong, songLocation,
 	points = [],
 	overlays = [],
 	mapOptions = {
@@ -66,43 +66,54 @@ $(document).ready(function() {
       	});	
 		
 		$(document).on('click', '.result', function(e) {
-			var id = $(this).attr('id');
-			play(id);
+			playSongFromInfoAndPost(this);
 			$('#search').toggle();
-			postSong(id, curLat, curLong);
 		});	
 
+		$(document).on('click', '.infoBox', function(e) {
+			playSongFromInfo(this);
+		});
+
 		$('#skip').click(function() {
+			for (i = 0; i <  overlays.length; i++) {
+				if (overlays[i].getPosition().equals(songLocation)) {
+					overlays[i].setIcon("music_pin.png")
+				}
+			}
 			queueNextSong();
 		});
 		
 		$('#play').click(function() {
-			if ($('.icon-play').is(':visible')) {
-				$('.icon-play').hide();
+			if ($('#bottom-playbar .icon-play').is(':visible')) {
+				$('#bottom-playbar .icon-play').hide();
 				$('.icon-pause').show();
 				$('#api').rdio().play();
 			} else {
-				$('.icon-play').show();
+				$('#bottom-playbar .icon-play').show();
 				$('.icon-pause').hide();
 				$('#api').rdio().pause();
 			}
 		});
 		
 		$('#favorite').click(function() {
-			postSong(curId, curLat, curLong);
+			postSong(curId, curSong, curArtist, curLat, curLong, curUrl);
 			$('#favorite i').removeClass('icon-star-empty');
 			$('#favorite i').addClass('icon-star');
 		});
 		
 		var socket = new WebSocket("ws://buffalohackers.com/ws");
 		socket.onmessage = function(data) {
+			var infowindow = new google.maps.InfoWindow();
 			var point = JSON.parse(data.data);
+			var songId = point["id"]
 			points[points.length] = new google.maps.LatLng(point.lat, point.long);
 			overlays[overlays.length] = new google.maps.Marker({
 				position: points[points.length-1],
 				map: map,
-				icon: 'music_pin.png'
+				icon: 'music_pin.png',
+				animation: google.maps.Animation.DROP
 			});
+			makeInfoWindowEvent(map, infowindow, formatInfoBox(songId, point.song, point.artist, point.genre, point.url), overlays[overlays.length-1]);
 		};		
 	}
 
@@ -135,6 +146,24 @@ function onSearchSong(e) {
 			}
 		});
 	}
+}
+
+function playSongFromInfoAndPost(htmlObject) {
+	var id = $(htmlObject).attr('id');
+	curSong = $(htmlObject).find(".songTitle").text();
+	curArtist = $(htmlObject).find(".artist").text();
+	curUrl = $(htmlObject).find(".albumArt").attr("src");
+	play(id, curLat, curLong);
+	postSong(id, curSong, curArtist, curLat, curLong, curUrl);
+}
+
+function playSongFromInfo(htmlObject) {
+	var id = $(htmlObject).attr('id');
+	curSong = $(htmlObject).find(".songTitle").text();
+	curArtist = $(htmlObject).find(".artist").text();
+	curUrl = $(htmlObject).find(".albumArt").attr("src");
+	console.log(curLat, curLong);
+	play(id, curLat, curLong);
 }
 
 function initRdio() {
@@ -204,20 +233,38 @@ function onSearch() {
 function setPoints(data) {
 	points = [];
 	for (var i = 0;i < data.length;i++) {
-		points[i] = new google.maps.LatLng(data[i].lat, data[i].long);
+		points[i] = {
+			"coordinates":new google.maps.LatLng(data[i].lat, data[i].long), 
+			"artist": data[i].artist, 
+			"song": data[i].song,
+			"genre": data[i].genre,
+			"id": data[i].id,
+			"url": data[i].url
+		}
 	}
 	placePoints();
 }
 
 function placePoints() {
 	clearOverlays();
+	var infowindow = new google.maps.InfoWindow();
+	console.log(points);
 	for (var i = 0;i < points.length;i++) {
 		overlays[i] = new google.maps.Marker({
-			position: points[i],
+			position: points[i]["coordinates"],
 			map: map,
 			icon: 'music_pin.png'
 		});
+		console.log(points[i]["id"]);
+		makeInfoWindowEvent(map, infowindow, formatInfoBox(points[i]["id"], points[i]["song"], points[i]["artist"], points[i]["genre"], points[i]["url"]), overlays[i]);
 	}
+}
+
+function makeInfoWindowEvent(map, infowindow, contentString, marker) {
+	google.maps.event.addListener(marker, 'click', function() {
+		infowindow.setContent(contentString);
+		infowindow.open(map, marker);
+	});
 }
 
 function makeHeatmap() {
@@ -241,20 +288,31 @@ function clearOverlays() {
 }
 
 function play(id, lat, lng) {
+	console.log(lat, lng);
 	$('#api').rdio().play(id);
+	songLocation = new google.maps.LatLng(lat, lng);
 	if (lat) {
-		map.panTo(new google.maps.LatLng(lat, lng));
+		map.panTo(songLocation);
 		map.setZoom(20);
+	}
+	for (i = 0; i <  overlays.length; i++) {
+		if (overlays[i].getPosition().equals(songLocation)) {
+			console.log("in");
+			overlays[i].setIcon("music_pin_active.png")
+		}
 	}
 	curId = id;
 }
 
-function postSong(id, lat, lng) {
+function postSong(id, song, artist, lat, lng, url) {
 	$.post('/songs', JSON.stringify({
 		session_key: $.cookie('session_id'),
 		id: id,
 		lat: lat,
-		long: lng
+		long: lng,
+		artist: artist,
+		song: song,
+		url: url
 	}), null, 'json');
 }
 
@@ -264,3 +322,11 @@ function prettyTime(time) {
 	seconds = seconds < 10 ? '0' + seconds : seconds;
 	return minutes + ":" + seconds;
 }
+
+function formatInfoBox(id, song, artist, genre, url) {
+	return "<div class='infoBox' id='" + id + "'><div id='left'><img class='albumArt' src='" + url + "'><div class='infoSet'><h2 class='songTitle'>" + song + "</h2>" +
+		   "<h3 class='artist'>" + artist + "</h3>" +
+		   "<p>(" + genre + ")</p></div></div>" +
+		   "<div id='right'><a class='infoPlay' id='" + id + "'><i class='icon-play'></i><br>Play Song</a></div></div>";
+}
+			

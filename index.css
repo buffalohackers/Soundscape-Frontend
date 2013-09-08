@@ -267,7 +267,7 @@ h3.artist {
 #duration {
 	padding-bottom: 12px;
 	font-size: .8em;
-	font-color: #424242;
+	color: #424242;
 }
 
 center p {
@@ -329,10 +329,60 @@ center p {
 	right: 190px;
 }
 
-.icon-play {
+#bottom-playbar .icon-play {
 	display:none;
 }
 
 .icon-star {
 	color: #ffc602;
 }
+
+.infoBox {
+	font-family: "Helvetica Neue", "serif";
+	font-weight:300;
+}
+
+.infoBox .songTitle {
+	margin:0;
+	padding:0;
+}
+
+.infoBox .artist {
+	padding:0;
+	margin:0;
+}
+
+.infoBox #right {
+	margin-top:10px;
+	float:right;
+	margin-left:50px;
+}
+
+.infoBox #left {
+	float:left;
+	margin-left:0px;
+}
+
+.infoBox .infoPlay .icon-play{
+	font-size:2.5em;
+	padding-right:15px;
+}
+
+.infoBox .infoPlay:hover {
+	cursor:pointer;
+}
+	   
+.infoBox .infoSet {
+	float:left;
+}
+
+.infoBox .albumArt {
+	float:left;
+	margin-right:15px
+}
+
+.infoBox p {
+	padding:0;
+	margin:0;
+}
+
