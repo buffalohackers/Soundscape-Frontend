@@ -131,7 +131,7 @@ $(document).ready(function() {
 			overlays[overlays.length] = new google.maps.Marker({
 				position: points[points.length-1],
 				map: map,
-				icon: '../img/music_pin.png',
+				icon: 'img/music_pin.png',
 				animation: google.maps.Animation.DROP
 			});
 			updateBlueDot();
@@ -181,7 +181,7 @@ function playSongFromInfoAndPost(htmlObject) {
 	play(id, curLat, curLong);
 	postSong(id, curSong, curArtist, curLat, curLong, curUrl);
 	updateBlueDot();
-	overlays[overlays.length-1].setIcon("../img/music_pin_active.png");
+	overlays[overlays.length-1].setIcon("img/music_pin_active.png");
 	console.log('HERERE');
 	overlays[overlays.length-1].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 
@@ -265,7 +265,7 @@ function placePoints() {
 		overlays[i] = new google.maps.Marker({
 			position: points[i]["coordinates"],
 			map: map,
-			icon: '../img/music_pin.png'
+			icon: 'img/music_pin.png'
 		});
 		makeInfoWindowEvent(map, infowindow, formatInfoBox(points[i]["id"], points[i]["song"], points[i]["artist"], points[i]["genre"], points[i]["url"], points[i]["coordinates"].ob, points[i]["coordinates"].pb), overlays[i]);
 	}
@@ -312,7 +312,7 @@ function play(id, lat, lng) {
 function updateBlueDot() {
 	for (i = 0; i <  overlays.length; i++) {
 		if (!overlays[i].getPosition().equals(songLocation)) {
-			overlays[i].setIcon("../img/music_pin.png")
+			overlays[i].setIcon("img/music_pin.png")
 			overlays[i].setZIndex(google.maps.Marker.MAX_ZINDEX);
 		}
 	}
@@ -320,7 +320,7 @@ function updateBlueDot() {
 		console.log('1');
 		if (overlays[i].getPosition().equals(songLocation)) {
 			console.log('0');
-			overlays[i].setIcon("../img/music_pin_active.png");
+			overlays[i].setIcon("img/music_pin_active.png");
 			overlays[i].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 		}
 	}
